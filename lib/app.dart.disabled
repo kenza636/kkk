@@ -1,0 +1,147 @@
+// Version corrigée du projet AirConcept.
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(const AirConceptApp());
+}
+
+class AirConceptApp extends StatelessWidget {
+  const AirConceptApp({super.key});
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+    debugShowCheckedModeBanner: false,
+    title: 'AirConcept',
+    theme: ThemeData(useMaterial3: true, scaffoldBackgroundColor: const Color(0xFFF5F7FB), colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3156C8))),
+    home: const Shell(),
+  );
+}
+
+class Shell extends StatefulWidget {
+  const Shell({super.key});
+  @override
+  State<Shell> createState() => _ShellState();
+}
+
+class _ShellState extends State<Shell> {
+  int selected = 0;
+  final labels = const ['Tableau de bord', 'Phrases', 'Graphes conceptuels', 'Projection', 'Généralisation', 'Spécialisation', 'Base de données'];
+  final icons = const [Icons.home_outlined, Icons.description_outlined, Icons.share_outlined, Icons.alt_route, Icons.call_split, Icons.account_tree_outlined, Icons.storage_outlined];
+
+  @override
+  Widget build(BuildContext context) {
+    final compact = MediaQuery.sizeOf(context).width < 980;
+    final pages = [const DashboardPage(), const PhrasesPage(), const GraphPage(), _simple('Projection'), _simple('Généralisation'), _simple('Spécialisation'), _simple('Base de données')];
+    return Scaffold(body: Row(children: [
+      if (!compact) Sidebar(labels: labels, icons: icons, selected: selected, onSelect: (i) => setState(() => selected = i)),
+      Expanded(child: Column(children: [
+        if (compact) AppTopBar(labels: labels, onSelect: (i) => setState(() => selected = i)),
+        Expanded(child: AnimatedSwitcher(duration: const Duration(milliseconds: 180), child: pages[selected])),
+      ])),
+    ]));
+  }
+
+  Widget _simple(String title) => Column(children: [Header(title: title, subtitle: 'Module connecté à votre espace AirConcept'), const Expanded(child: Center(child: Text('Interface prête à être configurée', style: TextStyle(color: Color(0xFF8795B5)))))]);
+}
+
+class AppTopBar extends StatelessWidget {
+  final List<String> labels;
+  final ValueChanged<int> onSelect;
+  const AppTopBar({super.key, required this.labels, required this.onSelect});
+  @override
+  Widget build(BuildContext context) => Container(height: 64, padding: const EdgeInsets.symmetric(horizontal: 16), color: Colors.white, child: Row(children: [const Icon(Icons.flight_takeoff_rounded, color: Color(0xFF3156C8)), const SizedBox(width: 10), const Text('AirConcept', style: TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF17358A))), const Spacer(), PopupMenuButton<int>(onSelected: onSelect, itemBuilder: (_) => [for (var i = 0; i < labels.length; i++) PopupMenuItem(value: i, child: Text(labels[i]))])]));
+}
+
+class Sidebar extends StatelessWidget {
+  final List<String> labels;
+  final List<IconData> icons;
+  final int selected;
+  final ValueChanged<int> onSelect;
+  const Sidebar({super.key, required this.labels, required this.icons, required this.selected, required this.onSelect});
+  @override
+  Widget build(BuildContext context) => Container(width: 270, decoration: const BoxDecoration(color: Colors.white, border: Border(right: BorderSide(color: Color(0xFFE7EBF3)))), child: Column(children: [
+    const SizedBox(height: 28),
+    Padding(padding: const EdgeInsets.symmetric(horizontal: 34), child: Row(children: [Container(width: 48, height: 48, decoration: BoxDecoration(color: const Color(0xFF3156C8), borderRadius: BorderRadius.circular(12)), child: const Icon(Icons.flight_takeoff_rounded, color: Colors.white)), const SizedBox(width: 13), const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('AirConcept', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF17358A))), Text('GRAPHES CONCEPTUELS', style: TextStyle(fontSize: 9, letterSpacing: 1.6, color: Color(0xFF8795B5), fontWeight: FontWeight.w700))])])),
+    const SizedBox(height: 32),
+    const Padding(padding: EdgeInsets.symmetric(horizontal: 36), child: Align(alignment: Alignment.centerLeft, child: Text('MENU PRINCIPAL', style: TextStyle(fontSize: 9, letterSpacing: 1.5, color: Color(0xFF8795B5), fontWeight: FontWeight.w800)))),
+    const SizedBox(height: 10),
+    Expanded(child: ListView.builder(padding: const EdgeInsets.symmetric(horizontal: 16), itemCount: labels.length, itemBuilder: (_, i) { final active = i == selected; return Padding(padding: const EdgeInsets.only(bottom: 5), child: InkWell(onTap: () => onSelect(i), borderRadius: BorderRadius.circular(8), child: Container(height: 48, decoration: BoxDecoration(color: active ? const Color(0xFFEEF3FF) : Colors.transparent, borderRadius: BorderRadius.circular(8)), child: Row(children: [AnimatedContainer(duration: const Duration(milliseconds: 180), width: 3, height: active ? 30 : 0, margin: const EdgeInsets.only(right: 10), decoration: const BoxDecoration(color: Color(0xFF3156C8), borderRadius: BorderRadius.horizontal(right: Radius.circular(3)))), Icon(icons[i], size: 21, color: active ? const Color(0xFF3156C8) : const Color(0xFF7B879E)), const SizedBox(width: 13), Text(labels[i], style: TextStyle(fontSize: 14, color: active ? const Color(0xFF3156C8) : const Color(0xFF69758B), fontWeight: active ? FontWeight.w700 : FontWeight.w500))])))); })),
+    Container(margin: const EdgeInsets.fromLTRB(16, 0, 16, 22), padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12), decoration: BoxDecoration(border: Border(top: BorderSide(color: Colors.grey.shade200))), child: Row(children: [Container(width: 38, height: 38, alignment: Alignment.center, decoration: BoxDecoration(color: const Color(0xFF3156C8), borderRadius: BorderRadius.circular(10)), child: const Text('AK', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800))), const SizedBox(width: 10), const Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Allaoua Kenza', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13)), Text('Étudiante', style: TextStyle(fontSize: 11, color: Color(0xFF8795B5)))])), const Icon(Icons.logout, size: 18, color: Color(0xFF8795B5))])),
+  ]));
+}
+
+class Header extends StatelessWidget {
+  final String title, subtitle;
+  const Header({super.key, required this.title, required this.subtitle});
+  @override
+  Widget build(BuildContext context) => Padding(padding: const EdgeInsets.fromLTRB(32, 26, 32, 18), child: Row(children: [Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: Color(0xFF17243A))), const SizedBox(height: 7), Text(subtitle, style: const TextStyle(fontSize: 13, color: Color(0xFF8795B5))) ])), Container(width: 42, height: 42, alignment: Alignment.center, decoration: BoxDecoration(color: const Color(0xFF3156C8), borderRadius: BorderRadius.circular(10)), child: const Text('AK', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800))), const SizedBox(width: 10), const Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Allaoua Kenza', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 12)), Text('Étudiante', style: TextStyle(fontSize: 10, color: Color(0xFF8795B5)))])]));
+}
+
+class DashboardPage extends StatelessWidget {
+  const DashboardPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    final wide = MediaQuery.sizeOf(context).width > 900;
+    return SingleChildScrollView(child: Column(children: [const Header(title: 'Tableau de bord', subtitle: 'Vue d’ensemble de votre espace de modélisation'), Padding(padding: const EdgeInsets.symmetric(horizontal: 32), child: Column(children: [
+      Container(width: double.infinity, padding: const EdgeInsets.all(28), decoration: BoxDecoration(color: const Color(0xFF173C82), borderRadius: BorderRadius.circular(14)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('ESPACE ACADÉMIQUE', style: TextStyle(fontSize: 9, letterSpacing: 1.6, color: Colors.blue.shade100, fontWeight: FontWeight.w800)), const SizedBox(height: 13), const Text('Bonjour Allaoua Kenza', style: TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.w800)), const SizedBox(height: 8), Text('Créez et explorez simplement vos graphes conceptuels aéronautiques.', style: TextStyle(fontSize: 12, color: Colors.blue.shade100)), const SizedBox(height: 20), ElevatedButton.icon(onPressed: () {}, style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: const Color(0xFF3156C8), elevation: 0, padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16)), icon: const Icon(Icons.add), label: const Text('Nouvelle phrase'))])),
+      const SizedBox(height: 22),
+      GridView.count(crossAxisCount: wide ? 4 : 2, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: wide ? 1.85 : 1.35, children: const [StatCard(Icons.layers_outlined, Color(0xFF4777F6), 'Concepts', '128', '+12%'), StatCard(Icons.link, Color(0xFF815CF4), 'Relations', '94', '+8%'), StatCard(Icons.share_outlined, Color(0xFF12A69A), 'Graphes créés', '36', '+5'), StatCard(Icons.call_split, Color(0xFFE88A48), 'Projections', '21', '87%')]),
+      const SizedBox(height: 22),
+      Container(padding: const EdgeInsets.all(24), width: double.infinity, decoration: BoxDecoration(color: Colors.white, border: Border.all(color: const Color(0xFFE4E9F2)), borderRadius: BorderRadius.circular(12)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('DERNIÈRE MODÉLISATION', style: TextStyle(fontSize: 9, letterSpacing: 1.5, color: Color(0xFF8795B5), fontWeight: FontWeight.w800)), const SizedBox(height: 7), const Row(children: [Expanded(child: Text('Graphe conceptuel récent', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800))), Text('Voir le graphe', style: TextStyle(color: Color(0xFF3156C8), fontWeight: FontWeight.w700, fontSize: 12)), Icon(Icons.arrow_forward, size: 16, color: Color(0xFF3156C8))]), const SizedBox(height: 18), Container(height: 300, decoration: BoxDecoration(color: const Color(0xFFFDFEFF), border: Border.all(color: const Color(0xFFE7EBF3)), borderRadius: BorderRadius.circular(12)), child: const GraphCanvas())])
+    ]))]));
+  }
+}
+
+class StatCard extends StatelessWidget {
+  final IconData icon; final Color color; final String title, value, change;
+  const StatCard(this.icon, this.color, this.title, this.value, this.change, {super.key});
+  @override
+  Widget build(BuildContext context) => Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: Colors.white, border: Border.all(color: const Color(0xFFE4E9F2)), borderRadius: BorderRadius.circular(12)), child: Row(children: [Container(width: 44, height: 44, decoration: BoxDecoration(color: color.withOpacity(.1), borderRadius: BorderRadius.circular(10)), child: Icon(icon, color: color)), const SizedBox(width: 14), Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(title, style: const TextStyle(fontSize: 11, color: Color(0xFF8795B5))), const SizedBox(height: 4), Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800))])), Container(padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3), decoration: BoxDecoration(color: color.withOpacity(.09), borderRadius: BorderRadius.circular(7)), child: Text(change, style: TextStyle(fontSize: 9, color: color, fontWeight: FontWeight.w800))) ]));
+}
+
+class PhrasesPage extends StatelessWidget {
+  const PhrasesPage({super.key});
+  @override
+  Widget build(BuildContext context) {
+    const phrases = ['Le passager voyage dans un avion vers Paris.', 'Le pilote opère le vol AF123 depuis Orly.', 'L’avion décolle de l’aéroport de Tunis.', 'Le mécanicien inspecte les moteurs.'];
+    return SingleChildScrollView(child: Column(children: [const Header(title: 'Gestion des phrases', subtitle: 'Créez et organisez votre corpus aéronautique'), Padding(padding: const EdgeInsets.symmetric(horizontal: 32), child: Column(children: [
+      Container(padding: const EdgeInsets.all(24), decoration: BoxDecoration(color: const Color(0xFF173C82), borderRadius: BorderRadius.circular(12)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Row(children: [Icon(Icons.description_outlined, color: Colors.white), SizedBox(width: 10), Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text('Nouvelle phrase', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800)), Text('Saisissez une phrase liée au transport aérien.', style: TextStyle(color: Color(0xFFCBD8EF), fontSize: 11))])]), const SizedBox(height: 16), Container(padding: const EdgeInsets.all(8), decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(8)), child: const Row(children: [Expanded(child: TextField(decoration: InputDecoration(hintText: 'Ex. Le passager embarque dans un avion…', border: InputBorder.none), maxLines: 2)), SizedBox(width: 8), ElevatedButton(onPressed: null, child: Text('Ajouter la phrase'))]))]),
+      const SizedBox(height: 26),
+      Container(padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: Colors.white, border: Border.all(color: const Color(0xFFE4E9F2)), borderRadius: BorderRadius.circular(12)), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [const Text('CORPUS', style: TextStyle(fontSize: 9, letterSpacing: 1.5, color: Color(0xFF8795B5), fontWeight: FontWeight.w800)), const Text('Phrases enregistrées', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800)), const SizedBox(height: 14), for (var i = 0; i < phrases.length; i++) PhraseRow(phrases[i], 3 + i)])
+    ]))]));
+  }
+}
+
+class PhraseRow extends StatelessWidget {
+  final String text; final int count;
+  const PhraseRow(this.text, this.count, {super.key});
+  @override
+  Widget build(BuildContext context) => Container(height: 62, decoration: const BoxDecoration(border: Border(bottom: BorderSide(color: Color(0xFFF0F3F8)))), child: Row(children: [const Icon(Icons.description_outlined, size: 18, color: Color(0xFF3156C8)), const SizedBox(width: 12), Expanded(child: Text(text, style: const TextStyle(fontSize: 12))), Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: const Color(0xFFEEF8F4), borderRadius: BorderRadius.circular(10)), child: const Text('Analysée', style: TextStyle(fontSize: 9, color: Color(0xFF277B65)))), const SizedBox(width: 20), Text('$count concepts', style: const TextStyle(fontSize: 10, color: Color(0xFF8795B5))), const SizedBox(width: 12), const Icon(Icons.share_outlined, size: 18), const SizedBox(width: 8), const Icon(Icons.edit_outlined, size: 18), const SizedBox(width: 8), const Icon(Icons.delete_outline, size: 18)]));
+}
+
+class GraphPage extends StatelessWidget {
+  const GraphPage({super.key});
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(child: Column(children: [const Header(title: 'Graphes conceptuels', subtitle: 'Transformez une phrase en représentation conceptuelle'), Padding(padding: const EdgeInsets.symmetric(horizontal: 32), child: Column(children: [
+    Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: Colors.white, border: Border.all(color: const Color(0xFFE4E9F2)), borderRadius: BorderRadius.circular(12)), child: Row(children: [const Text('1', style: TextStyle(color: Color(0xFF3156C8), fontWeight: FontWeight.w800)), const SizedBox(width: 12), const Expanded(child: Text('Le passager voyage dans un avion vers Paris.', style: TextStyle(fontSize: 12))), ElevatedButton.icon(onPressed: () {}, style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF3156C8), foregroundColor: Colors.white), icon: const Icon(Icons.auto_awesome, size: 18), label: const Text('Générer le graphe'))]),
+    const SizedBox(height: 18),
+    Container(padding: const EdgeInsets.all(18), decoration: BoxDecoration(color: Colors.white, border: Border.all(color: const Color(0xFFE4E9F2)), borderRadius: BorderRadius.circular(12)), child: Column(children: [const Align(alignment: Alignment.centerLeft, child: Text('Graphe conceptuel #036', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800))), const SizedBox(height: 14), SizedBox(height: 320, child: const GraphCanvas())]))
+  ]))]));
+}
+
+class GraphCanvas extends StatelessWidget {
+  const GraphCanvas({super.key});
+  @override
+  Widget build(BuildContext context) => CustomPaint(painter: GraphPainter(), child: const SizedBox.expand());
+}
+
+class GraphPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final line = Paint()..color = const Color(0xFFB4BDD3)..strokeWidth = 1.5..style = PaintingStyle.stroke;
+    final pass = Offset(size.width * .20, size.height * .43); final vol = Offset(size.width * .44, size.height * .20); final aircraft = Offset(size.width * .44, size.height * .68); final airport = Offset(size.width * .72, size.height * .43); final city = Offset(size.width * .90, size.height * .43);
+    canvas.drawLine(pass, vol, line); canvas.drawLine(pass, aircraft, line); canvas.drawLine(vol, airport, line); canvas.drawLine(aircraft, airport, line); canvas.drawLine(airport, city, line);
+    void node(Offset p, String top, String bottom, Color border) { final r = RRect.fromRectAndRadius(Rect.fromCenter(center: p, width: 132, height: 58), const Radius.circular(8)); canvas.drawRRect(r, Paint()..color = Colors.white); canvas.drawRRect(r, Paint()..color = border..strokeWidth = 1.6..style = PaintingStyle.stroke); final a = TextPainter(text: TextSpan(text: top, style: const TextStyle(fontSize: 7, letterSpacing: 1, color: Color(0xFF8795B5), fontWeight: FontWeight.w800)), textDirection: TextDirection.ltr)..layout(); final b = TextPainter(text: TextSpan(text: bottom, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w800, color: Color(0xFF17243A))), textDirection: TextDirection.ltr)..layout(); a.paint(canvas, Offset(p.dx - a.width / 2, p.dy - 18)); b.paint(canvas, Offset(p.dx - b.width / 2, p.dy - 2)); }
+    node(pass, 'PERSONNE', 'Passager', const Color(0xFF815CF4)); node(vol, 'VOL', 'AF 123', const Color(0xFF4777F6)); node(aircraft, 'AÉRONEF', 'Airbus A320', const Color(0xFF4777F6)); node(airport, 'AÉROPORT', 'Paris CDG', const Color(0xFF12A69A)); node(city, 'VILLE', 'Paris', const Color(0xFFE88A48));
+  }
+  @override bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
