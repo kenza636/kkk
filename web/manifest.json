@@ -1,11 +1,11 @@
 {
-    "name": "airconcept",
-    "short_name": "airconcept",
+    "name": "AirGraph",
+    "short_name": "AirGraph",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "background_color": "#F6F8FC",
+    "theme_color": "#152F50",
+    "description": "Explorez et créez des graphes conceptuels avec AirGraph.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
